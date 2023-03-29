@@ -1,3 +1,3 @@
-module github.com/yxclud1/go-comm
+module github.com/yxcloud1/go-comm
 
 go 1.19

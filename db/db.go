@@ -88,15 +88,19 @@ func (s *dataService) open() error {
 	} else {
 		return errors.New("不支持的数据库驱动 " + s.connectionType)
 	}
+
+
 	if err != nil {
 		s.conn = nil
-		log.Println("ERROR1:", err)
 		return err
 	}
+
 	s.conn = conn
 	sqlDB, err := s.conn.DB()
 	if err != nil {
-		log.Println("ERROR2:", err)
+		return err
+	}
+	if err := sqlDB.Ping(); err != nil {
 		return err
 	}
 	s.sqlDB = sqlDB

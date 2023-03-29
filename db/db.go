@@ -61,9 +61,6 @@ func (s* dataService) close() error{
 	if s.sqlDB != nil {
 		s.sqlDB.Close()
 	}
-	if s.conn != nil{
-		s.conn.Close()
-	}
 	s.sqlDB = nil
 	s.conn= nil
 	return nil

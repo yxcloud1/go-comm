@@ -32,6 +32,7 @@ var (
 func SetOption(connectionType string, connectionUrl string){
 	db.connectionType = connectionType
 	db.connectionUrl = connectionUrl
+	db.Start()
 }
 
 func DB() *dataService {
@@ -54,6 +55,20 @@ func (s *dataService) Start() error {
 func (s *dataService) Conn() *gorm.DB {
 	return s.conn
 }
+
+
+func (s* dataService) close() error{
+	if s.sqlDB != nil {
+		s.sqlDB.Close()
+	}
+	if s.conn != nil{
+		s.conn.Close()
+	}
+	s.sqlDB = nil
+	s.conn= nil
+	return nil
+}
+
 
 func (s *dataService) open() error {
 	if s.conn != nil {

@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-comm/logger"
 	"github.com/kardianos/service"
+	"github.com/yxcloud1/go-comm/logger"
 )
 
 type ServiceProgram interface {

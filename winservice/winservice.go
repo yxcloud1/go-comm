@@ -60,7 +60,7 @@ func runAsNoService(run func() error, kill func() error) error {
 		close(sigs)
 	}()
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	run()
+	go run()
 	<-sigs
 	return kill()
 }

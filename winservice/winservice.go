@@ -3,6 +3,8 @@ package winservice
 import (
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/kardianos/service"
 	"github.com/yxcloud1/go-comm/logger"
@@ -18,25 +20,24 @@ type WinService struct {
 	config *service.Config
 }
 
-type ServiceInstance struct{
+type ServiceInstance struct {
 	kill func() error
-	run func() error
+	run  func() error
 }
 
-func (s* ServiceInstance) Run() error{
-	if s.run != nil{
+func (s *ServiceInstance) Run() error {
+	if s.run != nil {
 		return s.run()
 	}
 	return nil
 }
 
-func (s* ServiceInstance) Kill() error{
-	if s.kill != nil{
+func (s *ServiceInstance) Kill() error {
+	if s.kill != nil {
 		return s.kill()
 	}
 	return nil
 }
-
 
 func (p *WinService) Start(s service.Service) error {
 	go p.prog.Run()
@@ -53,9 +54,18 @@ func (p *WinService) Stop(s service.Service) error {
 	return err
 }
 
+func runAsNoService(run func() error, kill func() error) error {
+	sigs := make(chan os.Signal, 1)
+	defer func(){
+		close(sigs)
+	}()
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	run()
+	<-sigs
+	return kill()
+}
 
-
-func RunAsService(serviceName string, displayName string, description string, run func() error,  kill func() error) {
+func RunAsService(serviceName string, displayName string, description string, run func() error, kill func() error) {
 
 	svrCfg := &service.Config{
 		Name:        serviceName,
@@ -66,9 +76,9 @@ func RunAsService(serviceName string, displayName string, description string, ru
 	//	logFile, _ := os.OpenFile(filepath.Dir(os.Args[0])+"/log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	svr := &WinService{
 		config: svrCfg,
-		prog:   &ServiceInstance{
+		prog: &ServiceInstance{
 			kill: kill,
-			run: run,
+			run:  run,
 		},
 	}
 	s, err := service.New(svr, svrCfg)
@@ -98,9 +108,9 @@ func RunAsService(serviceName string, displayName string, description string, ru
 			}
 			return
 		}
-		if os.Args[1] == "run"{
-			if run!=nil{
-				run()
+		if os.Args[1] == "run" {
+			if run != nil {
+				runAsNoService(run, kill)
 			}
 			return
 		}

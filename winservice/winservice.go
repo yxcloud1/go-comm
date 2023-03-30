@@ -98,6 +98,12 @@ func RunAsService(serviceName string, displayName string, description string, ru
 			}
 			return
 		}
+		if os.Args[1] == "run"{
+			if run!=nil{
+				run()
+			}
+			return
+		}
 	}
 	err = s.Run()
 	if err != nil {

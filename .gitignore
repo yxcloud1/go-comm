@@ -1,0 +1,55 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+.vscode
+*.html
+test
+*.json
+*.zip
+alarmSync
+.DS_Store
+mqttdemo
+platform
+*.log
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+*.exe
+main
+
+
+mes2psinterface
+DataCollection
+!DataCollection/
+# Dependency directories (remove the comment below to include it)
+# vendor/
+# Build and Release Folders
+bin-debug/
+bin-release/
+[Oo]bj/
+[Bb]in/
+
+test/
+log/
+err/
+modelproto/
+# Other files and folders
+.settings/
+
+# Executables
+*.swf
+*.air
+*.ipa
+*.apk
+*.txt
+.vscode
+.platform
+
+# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
+# should NOT be excluded as they contain compiler settings and other important
+# information for Eclipse / Flash Builder.

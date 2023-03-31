@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	_ "github.com/sijms/go-ora/v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlserver"
@@ -24,12 +25,12 @@ type dataService struct {
 
 var (
 	db = &dataService{
-		conn:           nil,
-		sqlDB:          nil,
+		conn:  nil,
+		sqlDB: nil,
 	}
 )
 
-func SetOption(connectionType string, connectionUrl string){
+func SetOption(connectionType string, connectionUrl string) {
 	db.connectionType = connectionType
 	db.connectionUrl = connectionUrl
 	db.Start()
@@ -56,16 +57,14 @@ func (s *dataService) Conn() *gorm.DB {
 	return s.conn
 }
 
-
-func (s* dataService) close() error{
+func (s *dataService) close() error {
 	if s.sqlDB != nil {
 		s.sqlDB.Close()
 	}
 	s.sqlDB = nil
-	s.conn= nil
+	s.conn = nil
 	return nil
 }
-
 
 func (s *dataService) open() error {
 	if s.conn != nil {
@@ -97,10 +96,19 @@ func (s *dataService) open() error {
 
 	} else if s.connectionType == "mysql" {
 		conn, err = gorm.Open(mysql.Open(s.connectionUrl), config)
+	} else if s.connectionType == "oracle" {
+		dbs, err := sql.Open("oracle", s.connectionUrl)
+		if err != nil {
+			return err
+		}
+		conn, _ = gorm.Open(sqlserver.New(sqlserver.Config{
+			Conn: dbs,
+		}),
+			config,
+		)
 	} else {
 		return errors.New("不支持的数据库驱动 " + s.connectionType)
 	}
-
 
 	if err != nil {
 		s.conn = nil
@@ -114,6 +122,8 @@ func (s *dataService) open() error {
 	}
 	if err := sqlDB.Ping(); err != nil {
 		return err
+	}else{
+		log.Println("Connect to ", s.connectionUrl , "successfully")
 	}
 	s.sqlDB = sqlDB
 	sqlDB.SetMaxIdleConns(10)

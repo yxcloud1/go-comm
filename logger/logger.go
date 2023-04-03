@@ -24,7 +24,7 @@ var (
 		status: map[string]bool{
 			"ERROR":   true,
 			"WARRING": true,
-			"LOG":     true,
+			"INFO":     true,
 			"DEBUG":   true,
 		},
 	}
@@ -98,7 +98,7 @@ func Log(level string, message ...interface{}) error {
 		fmt.Printf("%s%s%s\n", defaultColor, msg, defaultColor)
 	}
 
-	if t, ok := opt.status[level]; ok {
+	if t, ok := opt.status[strings.ToUpper(level)]; ok {
 		if !t{
 			return nil
 		}

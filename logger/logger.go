@@ -14,12 +14,22 @@ import (
 type option struct{
 	level string
 }
+const(
+
+)
 
 var (
 	logMutex sync.Mutex
 	errMutex sync.Mutex
 	opt = &option{
 		level: "INFO",
+	}
+	defaultColor = "\033[0m"
+	COLOR = map[string]string{
+		"ERROR": "\033[31m]",
+		"WARNING": "\033[33",
+		"INFO": "\033[0m",
+		"RESET": "\033[0m",
 	}
 )
 
@@ -67,6 +77,33 @@ func txtLogger(message ...interface{}) error {
 		defer file.Close()
 		write := bufio.NewWriter(file)
 		msg := fmt.Sprintf("%s\t%s\r\n", time.Now().Format(time.RFC3339), fmt.Sprint(message...))
+		write.WriteString(msg)
+		write.Flush()
+		return nil
+	} else {
+		return err
+	}
+}
+
+func Log(level string, message ... interface{}) error {
+	msg := fmt.Sprintf("%s\t%s\t%s\r\n", time.Now().Format(time.RFC3339), level,fmt.Sprint(message...))
+
+	if cl, ok := COLOR[level]; ok {
+		fmt.Printf("%s%s%s\n", cl, msg, defaultColor)
+	}else{
+		fmt.Printf("%s%s%s\n", defaultColor, msg, defaultColor)
+	}
+	logMutex.Lock()
+	defer logMutex.Unlock()
+	if path, err := createLogParh(); err == nil {
+		file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		write := bufio.NewWriter(file)
+
+
 		write.WriteString(msg)
 		write.Flush()
 		return nil

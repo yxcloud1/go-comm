@@ -42,7 +42,7 @@ var (
 func SetOption(level string) {
 	opt.level = level
 	for k := range opt.status {
-		if strings.Contains(level, k) {
+		if strings.Contains(strings.ToUpper(level), k) {
 			opt.status[k] = true
 		}
 	}
@@ -97,6 +97,13 @@ func Log(level string, message ...interface{}) error {
 	} else {
 		fmt.Printf("%s%s%s\n", defaultColor, msg, defaultColor)
 	}
+
+	if t, ok := opt.status[level]; ok {
+		if !t{
+			return nil
+		}
+	}
+
 	logMutex.Lock()
 	defer logMutex.Unlock()
 	if path, err := createPath(level); err == nil {

@@ -7,6 +7,11 @@ import (
 	"os"
 	"path/filepath"
 )
+
+type Configure interface{
+	SetDefault() error
+}
+
 var
 (
 	path string
@@ -34,6 +39,9 @@ func Load(cfg interface{})error{
 			log.Println("json error ", err)
 			return err
 		}
+	}
+	if t, ok := cfg.(Configure);ok{
+		t.SetDefault()
 	}
 	json, _ := json.MarshalIndent(cfg, "\t", "\t")
 	return ioutil.WriteFile(path, json, 0644)

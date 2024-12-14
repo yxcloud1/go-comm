@@ -121,7 +121,7 @@ func createErrParh() (string, error) {
 func txtLogger(msg ...interface{}) error {
 	message := ""
 	for _, v := range msg {
-		message += fmt.Sprintf("%+v\r\n", v)
+		message += fmt.Sprintf("\r\n%+v", v)
 	}
 	log.Println(message)
 	logMutex.Lock()
@@ -198,7 +198,7 @@ func TxtLog(message ...interface{}) error {
 
 func TxtErr(message ...interface{}) error {
 	message = append([]interface{}{"ERROR"}, message...)
-    
+
 	txtLogger(message)
 	if !strings.Contains(opt.level, "ERROR") {
 		return nil

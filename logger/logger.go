@@ -149,7 +149,7 @@ func Log(level string, messages ...interface{}) error {
 	}
 	log.Println(message)
 
-	msg := fmt.Sprintf("%s\t%s\t%s\r\n", time.Now().Format(time.RFC3339), level, message)
+	msg := fmt.Sprintf("%s\t%s\r\n%s\r\n", time.Now().Format(time.RFC3339), level, message)
 
 	if cl, ok := COLOR[level]; ok {
 		fmt.Printf("%s%s%s\n", cl, msg, defaultColor)
@@ -198,6 +198,7 @@ func TxtLog(message ...interface{}) error {
 
 func TxtErr(message ...interface{}) error {
 	message = append([]interface{}{"ERROR"}, message...)
+    
 	txtLogger(message)
 	if !strings.Contains(opt.level, "ERROR") {
 		return nil

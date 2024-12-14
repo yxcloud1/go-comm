@@ -118,8 +118,12 @@ func createErrParh() (string, error) {
 	return createPath("err")
 }
 
-func txtLogger(message ...interface{}) error {
-	log.Println(message...)
+func txtLogger(msg ...interface{}) error {
+	message := ""
+	for _, v := range msg {
+		message += fmt.Sprintf("%+v\r\n", v)
+	}
+	log.Println(message)
 	logMutex.Lock()
 	defer logMutex.Unlock()
 	if path, err := createLogParh(); err == nil {
@@ -129,7 +133,7 @@ func txtLogger(message ...interface{}) error {
 		}
 		defer file.Close()
 		write := bufio.NewWriter(file)
-		msg := fmt.Sprintf("%s\t%s\r\n", time.Now().Format(time.RFC3339), fmt.Sprint(message...))
+		msg := fmt.Sprintf("%s\t%s\r\n", time.Now().Format(time.RFC3339), fmt.Sprint(message))
 		write.WriteString(msg)
 		write.Flush()
 		return nil
@@ -138,8 +142,14 @@ func txtLogger(message ...interface{}) error {
 	}
 }
 
-func Log(level string, message ...interface{}) error {
-	msg := fmt.Sprintf("%s\t%s\t%s\r\n", time.Now().Format(time.RFC3339), level, fmt.Sprint(message...))
+func Log(level string, messages ...interface{}) error {
+	message := ""
+	for _, v := range messages {
+		message += fmt.Sprintf("%+v\r\n", v)
+	}
+	log.Println(message)
+
+	msg := fmt.Sprintf("%s\t%s\t%s\r\n", time.Now().Format(time.RFC3339), level, message)
 
 	if cl, ok := COLOR[level]; ok {
 		fmt.Printf("%s%s%s\n", cl, msg, defaultColor)

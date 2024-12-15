@@ -29,7 +29,7 @@ var (
 			"INFO":    true,
 			"DEBUG":   true,
 		},
-		logDuration: time.Hour * 24 * 60 * 2,
+		logDuration: time.Hour * 24 * 30 * 2,
 
 
 	}
@@ -120,10 +120,19 @@ func createErrParh() (string, error) {
 
 func txtLogger(msg ...interface{}) error {
 	message := ""
-	for _, v := range msg {
-		message += fmt.Sprintf("\r\n%+v", v)
+	if len(msg) == 0{
+		return nil
 	}
-	log.Println(message)
+	for k, v := range msg {
+		if k > 0{
+		message += fmt.Sprintf("\r\n%v", v)
+	}
+}
+	beginstring := fmt.Sprintf("%s    ----------------------------%s-----------------------------------------",
+								time.Now().Format(time.RFC3339), msg[0])
+	endstring := strings.Repeat("*", (len(beginstring)))
+	message = beginstring + message + "\r\n"+  endstring
+	fmt.Println(message)
 	logMutex.Lock()
 	defer logMutex.Unlock()
 	if path, err := createLogParh(); err == nil {
@@ -133,14 +142,49 @@ func txtLogger(msg ...interface{}) error {
 		}
 		defer file.Close()
 		write := bufio.NewWriter(file)
-		msg := fmt.Sprintf("%s\t%s\r\n", time.Now().Format(time.RFC3339), fmt.Sprint(message))
-		write.WriteString(msg)
+		//message = fmt.Sprintf("%s\r\n%s\r\n", beginstring , message)
+		write.WriteString(message)
 		write.Flush()
 		return nil
 	} else {
 		return err
 	}
 }
+
+
+func txtError(msg ...interface{}) error {
+	message := ""
+	if len(msg) == 0{
+		return nil
+	}
+	for k, v := range msg {
+		if k > 0{
+		message += fmt.Sprintf("\r\n%v", v)
+	}
+}
+	beginstring := fmt.Sprintf("%s    ----------------------------%s-----------------------------------------",
+								time.Now().Format(time.RFC3339), msg[0])
+	endstring := strings.Repeat("*", (len(beginstring)))
+	message = beginstring + message + "\r\n" + endstring
+	fmt.Println(message)
+	errMutex.Lock()
+	defer errMutex.Unlock()
+	if path, err := createErrParh(); err == nil {
+		file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		write := bufio.NewWriter(file)
+		//message = fmt.Sprintf("%s\r\n%s\r\n", beginstring , message)
+		write.WriteString(message)
+		write.Flush()
+		return nil
+	} else {
+		return err
+	}
+}
+
 
 func Log(level string, messages ...interface{}) error {
 	message := ""
@@ -183,7 +227,7 @@ func Log(level string, messages ...interface{}) error {
 func TxtDebug(message ...interface{}) error {
 	if strings.Contains(opt.level, "DEBUG") {
 		message = append([]interface{}{"DEBUG"}, message...)
-		return txtLogger(message)
+		return txtLogger(message...)
 	}
 	return nil
 }
@@ -191,7 +235,7 @@ func TxtDebug(message ...interface{}) error {
 func TxtLog(message ...interface{}) error {
 	if strings.Contains(opt.level, "INFO") {
 		message = append([]interface{}{"INFO"}, message...)
-		return txtLogger(message)
+		return txtLogger(message...)
 	}
 	return nil
 }
@@ -203,20 +247,5 @@ func TxtErr(message ...interface{}) error {
 	if !strings.Contains(opt.level, "ERROR") {
 		return nil
 	}
-	errMutex.Lock()
-	defer errMutex.Unlock()
-	if path, err := createErrParh(); err == nil {
-		file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		write := bufio.NewWriter(file)
-		msg := fmt.Sprintf("%s\t%s\r\n", time.Now().Format(time.RFC3339), fmt.Sprint(message...))
-		write.WriteString(msg)
-		write.Flush()
-		return nil
-	} else {
-		return err
-	}
+	return txtError(message...)
 }

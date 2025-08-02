@@ -2,35 +2,39 @@ package config
 
 import (
 	"encoding/json"
-	"flag"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
-var(
+
+var (
 	path string
+	workDir string= ""
 )
+
 type Configure interface {
 	SetDefault() error
 }
 
-func init(){
+func init() {
 	path = ""
-	flag.StringVar(&path, "workdir", "", "配置文件路径")
-}
-
-func WorkDir() string {
-	workDir := ""
+	for _, v := range os.Args {
+		v = strings.TrimSpace(v)
+		if strings.HasPrefix(v, "-workdir=") {
+			path = v[len("-workdir="):]
+			break
+		}
+	}
 	if path != "" {
-
 		info, err := os.Stat(path)
-		if err != nil{
+		if err != nil {
 			path = ""
-		}else if !info.IsDir(){
+		} else if !info.IsDir() {
 			path = ""
 		}
 	}
-	if path != ""{
+	if path != "" {
 		if filepath.IsAbs(path) {
 			workDir = path
 		} else {
@@ -42,6 +46,9 @@ func WorkDir() string {
 		workDir, _ = filepath.Abs(os.Args[0])
 		workDir = filepath.Dir(workDir)
 	}
+}
+
+func WorkDir() string {
 	return workDir
 }
 
@@ -55,7 +62,7 @@ func configFile() string {
 			configFile = filepath.Join(workDir, "config.json")
 		}
 	}
-	return  configFile
+	return configFile
 }
 
 func Load(cfg interface{}) error {

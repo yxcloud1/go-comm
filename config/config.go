@@ -7,45 +7,56 @@ import (
 	"os"
 	"path/filepath"
 )
-
+var(
+	path string
+)
 type Configure interface {
 	SetDefault() error
 }
 
-var (
-	workpath   string
-	path       string
-	configFile string
-)
-
-func WorkPath() string {
-	return workpath
+func init(){
+	path = ""
+	flag.StringVar(&path, "workdir", "", "配置文件路径")
 }
 
-func init() {
-	path = *flag.String("path", "", "配置文件路径")
+func WorkDir() string {
+	workDir := ""
 	if path != "" {
-		if filepath.IsAbs(workpath){
-			workpath = path
-		}else{
-			workpath, _ = filepath.Abs(os.Args[0])
+		info, err := os.Stat(path)
+		if err != nil{
+			path = ""
+		}else if info.IsDir(){
+			path = ""
 		}
-	}else{
-		workpath, _ = filepath.Abs(os.Args[0])
-		workpath = filepath.Join(workpath, path)
 	}
-	configFile = filepath.Join(workpath, "config.json")
+	if path != ""{
+		if filepath.IsAbs(path) {
+			workDir = path
+		} else {
+			workDir, _ = filepath.Abs(os.Args[0])
+			workDir = filepath.Join(workDir, path)
+		}
+	} else {
+		workDir, _ = filepath.Abs(os.Args[0])
+	}
+	return workDir
+}
+
+func configFile() string {
+	workDir := WorkDir()
+	configFile := filepath.Join(workDir, "config.json")
 	_, err := os.Stat(configFile)
 	if err != nil {
-		configFile = filepath.Join(workpath,  "config.json")
+		configFile = filepath.Join(workDir, "config.json")
 		if _, err = os.Stat(configFile); err != nil {
-			path = filepath.Join(workpath, "config.json")
+			configFile = filepath.Join(workDir, "config.json")
 		}
 	}
+	return  configFile
 }
 
 func Load(cfg interface{}) error {
-	buf, err := os.ReadFile(path)
+	buf, err := os.ReadFile(configFile())
 	if err != nil {
 		log.Println(err)
 		return err
@@ -60,10 +71,10 @@ func Load(cfg interface{}) error {
 		t.SetDefault()
 	}
 	json, _ := json.MarshalIndent(cfg, "\t", "\t")
-	return os.WriteFile(path, json, 0644)
+	return os.WriteFile(configFile(), json, 0644)
 }
 
 func Save(cfg interface{}) error {
 	json, _ := json.MarshalIndent(cfg, "\t", "\t")
-	return os.WriteFile(path, json, 0644)
+	return os.WriteFile(configFile(), json, 0644)
 }

@@ -100,7 +100,7 @@ func deleteOld(logDir string) {
 
 func createPath(logtype string) (string, error) {
 	t := time.Now()
-	cwd :=  config.WorkPath()// filepath.Dir(os.Args[0])
+	cwd :=  config.WorkDir()// filepath.Dir(os.Args[0])
 	deleteOld(cwd + "/" + logtype)
 	path := t.Format("200601")
 	fileName := "/" + t.Format("02") + ".txt"

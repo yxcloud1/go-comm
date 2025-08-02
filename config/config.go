@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	path string
-	workDir string= ""
+	path    string
+	workDir string = ""
 )
 
 type Configure interface {
@@ -26,25 +26,20 @@ func init() {
 			break
 		}
 	}
-	if path != "" {
-		info, err := os.Stat(path)
-		if err != nil {
-			path = ""
-		} else if !info.IsDir() {
-			path = ""
-		}
-	}
-	if path != "" {
-		if filepath.IsAbs(path) {
-			workDir = path
-		} else {
-			workDir, _ = filepath.Abs(os.Args[0])
-			workDir = filepath.Dir(workDir)
-			workDir = filepath.Join(workDir, path)
-		}
+	if filepath.IsAbs(path) {
+		workDir = path
 	} else {
 		workDir, _ = filepath.Abs(os.Args[0])
 		workDir = filepath.Dir(workDir)
+		workDir = filepath.Join(workDir, path)
+	}
+	if info , err := os.Stat(workDir); err != nil{
+		workDir, _ = filepath.Abs(os.Args[0])
+		workDir = filepath.Dir(workDir)
+	}else{
+		if !info.IsDir(){
+			workDir = filepath.Dir(workDir)
+		}
 	}
 }
 

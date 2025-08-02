@@ -130,7 +130,7 @@ func txtLogger(msg ...interface{}) error {
 		message += fmt.Sprintf("\r\n%v", v)
 	}
 }
-	beginstring := fmt.Sprintf("%s    ----------------------------%s-----------------------------------------",
+	beginstring := fmt.Sprintf("\r\n%s    ----------------------------%s-----------------------------------------",
 								time.Now().Format(time.RFC3339), msg[0])
 	endstring := strings.Repeat("*", (len(beginstring)))
 	message = beginstring + message + "\r\n"+  endstring
@@ -164,7 +164,7 @@ func txtError(msg ...interface{}) error {
 		message += fmt.Sprintf("\r\n%v", v)
 	}
 }
-	beginstring := fmt.Sprintf("%s    ----------------------------%s-----------------------------------------",
+	beginstring := fmt.Sprintf("\r\n%s    ----------------------------%s-----------------------------------------",
 								time.Now().Format(time.RFC3339), msg[0])
 	endstring := strings.Repeat("*", (len(beginstring)))
 	message = beginstring + message + "\r\n" + endstring

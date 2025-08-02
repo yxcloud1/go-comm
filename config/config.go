@@ -34,10 +34,12 @@ func WorkDir() string {
 			workDir = path
 		} else {
 			workDir, _ = filepath.Abs(os.Args[0])
+			workDir = filepath.Dir(workDir)
 			workDir = filepath.Join(workDir, path)
 		}
 	} else {
 		workDir, _ = filepath.Abs(os.Args[0])
+		workDir = filepath.Dir(workDir)
 	}
 	return workDir
 }

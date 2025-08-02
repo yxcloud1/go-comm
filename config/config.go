@@ -2,34 +2,50 @@ package config
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"flag"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-type Configure interface{
+type Configure interface {
 	SetDefault() error
 }
 
-var
-(
-	path string
+var (
+	workpath   string
+	path       string
+	configFile string
 )
 
-func init(){
-	path = filepath.Dir(os.Args[0]) + "/config.json"
-	_, err := os.Stat(path)
-	if err != nil{
-		path = filepath.Dir(os.Args[0]) + "/../config.json"
-		if _, err = os.Stat(path);err != nil{
-			path  = filepath.Dir(os.Args[0]) + "/config.json"
+func WorkPath() string {
+	return workpath
+}
+
+func init() {
+	path = *flag.String("path", "", "配置文件路径")
+	if path != "" {
+		if filepath.IsAbs(workpath){
+			workpath = path
+		}else{
+			workpath, _ = filepath.Abs(os.Args[0])
+		}
+	}else{
+		workpath, _ = filepath.Abs(os.Args[0])
+		workpath = filepath.Join(workpath, path)
+	}
+	configFile = filepath.Join(workpath, "config.json")
+	_, err := os.Stat(configFile)
+	if err != nil {
+		configFile = filepath.Join(workpath,  "config.json")
+		if _, err = os.Stat(configFile); err != nil {
+			path = filepath.Join(workpath, "config.json")
 		}
 	}
 }
 
-func Load(cfg interface{})error{
-	buf, err := ioutil.ReadFile(path)
+func Load(cfg interface{}) error {
+	buf, err := os.ReadFile(path)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -40,14 +56,14 @@ func Load(cfg interface{})error{
 			return err
 		}
 	}
-	if t, ok := cfg.(Configure);ok{
+	if t, ok := cfg.(Configure); ok {
 		t.SetDefault()
 	}
 	json, _ := json.MarshalIndent(cfg, "\t", "\t")
-	return ioutil.WriteFile(path, json, 0644)
+	return os.WriteFile(path, json, 0644)
 }
 
-func Save(cfg interface{}) error{
+func Save(cfg interface{}) error {
 	json, _ := json.MarshalIndent(cfg, "\t", "\t")
-	return ioutil.WriteFile(path, json, 0644)
+	return os.WriteFile(path, json, 0644)
 }
